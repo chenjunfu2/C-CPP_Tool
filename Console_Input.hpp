@@ -210,6 +210,12 @@ public:
 	{
 		(void)GetTranslateKey();
 	}
+
+	//判断缓冲区内是否存在按键
+	static bool InputExists(void) noexcept
+	{
+		return _kbhit() != 0;
+	}
 };
 
 #undef EOL
