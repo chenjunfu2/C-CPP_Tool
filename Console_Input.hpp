@@ -73,6 +73,7 @@ public:
 	Console_Input(const Console_Input &) = delete;
 	Console_Input &operator = (const Console_Input &) = delete;
 
+	//测试按键的值
 	[[noreturn]] static void KeyCodeTest(void) noexcept//函数不会返回
 	{
 		/*
@@ -113,11 +114,13 @@ public:
 		return mapRegisterTable.contains(stKey);
 	}
 
+	//重置所有已注册按键
 	void Reset(void) noexcept
 	{
 		mapRegisterTable.clear();
 	}
 
+	//获取按键转义码（如果有转义）并返回
 	static Key GetTranslateKey(void)
 	{
 		Key stKeyRet;
@@ -143,6 +146,7 @@ public:
 		return stKeyRet;
 	}
 
+	//等待一个按键被按下
 	static void WaitForKey(Key stKeyWait)
 	{
 		Key stKeyGet;
@@ -155,6 +159,7 @@ public:
 		return;
 	}
 
+	//等待多个按键中的任意一个被按下并返回按下的按键
 	static Key WaitForKeys(const std::unordered_set<Key, KeyHash> &setKeysWait)
 	{
 		Key stKeyGet;
@@ -167,6 +172,7 @@ public:
 		return stKeyGet;//顺便返回一下让用户知道是哪个
 	}
 
+	//处理一次按键并触发回调并返回回调返回值
 	long Once(void) const//不保证函数会不会抛出异常
 	{
 		Key stKetGet = GetTranslateKey();
@@ -186,6 +192,7 @@ public:
 		}
 	}
 
+	//死循环处理按键并触发回调直到抛出异常或回调返回非0值
 	long Loop(void) const
 	{
 		long lRet = 0;
@@ -198,9 +205,10 @@ public:
 		return lRet;
 	}
 
+	//等待任一按键被按下
 	static void WaitAnyKey(void) noexcept
 	{
-		(void)_getch();
+		(void)GetTranslateKey();
 	}
 };
 
