@@ -51,7 +51,7 @@ public:
 
 	struct KeyHash
 	{
-		size_t operator()(const Key &stKeyHash)
+		size_t operator()(const Key &stKeyHash) const noexcept
 		{
 			return stKeyHash.Hash();
 		}
