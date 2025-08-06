@@ -1,14 +1,14 @@
 #pragma once
 
 #include <stdio.h>
-#include <varargs.h>
+#include <stdarg.h>
 
-//inline·ÀÖ¹ÖØ¶¨Òå£¬_Printf_format_string_ÓÃÓÚ´¥·¢±àÒëÆ÷²ÎÊıÀàĞÍÆ¥Åä¼ì²é
+//inlineé˜²æ­¢é‡å®šä¹‰ï¼Œ_Printf_format_string_ç”¨äºè§¦å‘ç¼–è¯‘å™¨å‚æ•°ç±»å‹åŒ¹é…æ£€æŸ¥
 inline void __MyAssert_Function__(const char *pFileName, size_t szLine, const char *pFunctionName, bool bValid, _Printf_format_string_ const char *pInfo, ...)
 {
 	if (bValid)
 	{
-		return;//Ğ£Ñé³É¹¦·µ»Ø
+		return;//æ ¡éªŒæˆåŠŸè¿”å›
 	}
 
 	printf("Assertion Failure!\n    in file: %s\n    in line: %zu\n    in func: %s\n    in info: ", pFileName, szLine, pFunctionName);
@@ -17,15 +17,16 @@ inline void __MyAssert_Function__(const char *pFileName, size_t szLine, const ch
 	va_start(vl, pInfo);
 	vprintf(pInfo, vl);
 	va_end(vl);
-	//°ïÃ¦»»ĞĞ
+	//å¸®å¿™æ¢è¡Œ
 	putchar('\n');
 
 	exit(-114514);
 }
 
-//´úÀíºê£¬ÑÓ³ÙÕ¹¿ª
+//ä»£ç†å®ï¼Œå»¶è¿Ÿå±•å¼€
 #define __MY_ASSERT_LINE__ __LINE__
 #define __MY_ASSERT_FILE__ __FILE__
-#define __MY_ASSERT_FUNC__ __FUNCSIG__//Ê¹ÓÃÍêÕûº¯ÊıÃû
+#define __MY_ASSERT_FUNC__ __FUNCSIG__//ä½¿ç”¨å®Œæ•´å‡½æ•°å
+
 
 #define MyAssert(v, i, ...) __MyAssert_Function__(__MY_ASSERT_FILE__, __MY_ASSERT_LINE__, __MY_ASSERT_FUNC__, (v), (i), __VA_ARGS__)
