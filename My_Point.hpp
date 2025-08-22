@@ -14,7 +14,7 @@ public:
 	//全部让其自动生成
 
 #define OPERATOR_XSELF_OBJ(op)\
-My_Point &operator##op(const My_Point &_Right) noexcept\
+My_Point &operator op(const My_Point &_Right) noexcept\
 	requires requires(T a, T b) {{ a op b } -> std::convertible_to<T>;}\
 {\
 	x op _Right.x;\
@@ -23,7 +23,7 @@ My_Point &operator##op(const My_Point &_Right) noexcept\
 }
 
 #define OPERATOR_XSELF_NUM(op)\
-My_Point &operator##op(const T & tNum) noexcept\
+My_Point &operator op(const T & tNum) noexcept\
 	requires requires(T a, T b) {{ a op b } -> std::convertible_to<T>;}\
 {\
 	x op tNum;\
@@ -32,7 +32,7 @@ My_Point &operator##op(const T & tNum) noexcept\
 }
 
 #define OPERATOR_XCOPY_OBJ(op)\
-My_Point operator##op(const My_Point &_Right) const noexcept\
+My_Point operator op(const My_Point &_Right) const noexcept\
 	requires requires(T a, T b) {{ a op b } -> std::convertible_to<T>;}\
 {\
 	return My_Point\
@@ -43,7 +43,7 @@ My_Point operator##op(const My_Point &_Right) const noexcept\
 }
 
 #define OPERATOR_XCOPY_NUM(op)\
-My_Point operator##op(const T & tNum) const noexcept\
+My_Point operator op(const T & tNum) const noexcept\
 	requires requires(T a, T b) {{ a op b } -> std::convertible_to<T>;}\
 {\
 	return My_Point\
