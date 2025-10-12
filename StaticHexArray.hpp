@@ -5,23 +5,24 @@
 #include <stdint.h>
 #include <stddef.h>
 
-template<typename T, size_t N>
-requires(sizeof(T) == 1)
-struct StaticHexArrayStaticStr: public std::array<T, N>
-{
-public:
-	using Super = std::array<T, N>;
-
-public:
-	constexpr StaticHexArrayStaticStr(const T(&_tStr)[N]) noexcept :Super(std::to_array(_tStr))
-	{}
-	constexpr ~StaticHexArrayStaticStr(void) noexcept = default;
-};
-
 class StaticHexArray
 {
 	StaticHexArray(void) = delete;
 	~StaticHexArray(void) = delete;
+
+public:
+	template<typename T, size_t N>
+	requires(sizeof(T) == 1)
+		struct StringLiteral : public std::array<T, N>
+	{
+	public:
+		using Super = std::array<T, N>;
+
+	public:
+		constexpr StringLiteral(const T(&_tStr)[N]) noexcept :Super(std::to_array(_tStr))
+		{}
+		constexpr ~StringLiteral(void) noexcept = default;
+	};
 
 private:
 	class Counter
@@ -155,7 +156,7 @@ private:
 	}
 
 public:
-	template<StaticHexArrayStaticStr sStr, typename T = uint8_t>
+	template<StringLiteral sStr, typename T = uint8_t>
 	static consteval auto ToHexArr(void) noexcept
 	{
 		constexpr auto szArrSize = Parse<Counter>(sStr.data(), sStr.size());
