@@ -1,7 +1,11 @@
-#pragma once
+ï»¿#pragma once
+
+#include <bit>
 
 #include <array>
-#include <bit>
+#include <string>
+#include <vector>
+
 #include <stdint.h>
 #include <stddef.h>
 
@@ -39,14 +43,14 @@ private:
 			++szCount;
 		}
 
-		constexpr auto Raw(void) const noexcept
+		constexpr const auto &Raw(void) const noexcept
 		{
 			return szCount;
 		}
 	};
 
 	template<typename T, size_t N>
-	requires(sizeof(T) == 1)//´óĞ¡±ØĞëÎª1
+	requires(sizeof(T) == 1)//å¤§å°å¿…é¡»ä¸º1
 	class Array
 	{
 	private:
@@ -63,40 +67,69 @@ private:
 			++szIndex;
 		}
 
-		constexpr auto Raw(void) const noexcept
+		constexpr const auto &Raw(void) const noexcept
 		{
 			return arrData;
 		}
 	};
 
-private:
-	static consteval uint8_t CharsToHex(char h, char l) noexcept
+	template<typename T = std::basic_string<uint8_t>>
+	requires(sizeof(typename T::value_type) == 1)//å¤§å°å¿…é¡»ä¸º1
+	class DynamicArray
 	{
-		auto CharToHex = [](char c) -> uint8_t
+	private:
+		T tData{};
+
+	public:
+		DynamicArray(size_t szReserve = 0)
 		{
-			switch (c)
+			if (szReserve != 0)
 			{
-			case '0': case '1': case '2': case '3': case '4':
-			case '5': case '6': case '7': case '8': case '9':
-				return (uint8_t)(c - '0') + (uint8_t)0x0;
-
-			case 'A': case 'B': case 'C':
-			case 'D': case 'E': case 'F':
-				return (uint8_t)(c - 'A') + (uint8_t)0xA;
-
-			case 'a': case 'b': case 'c':
-			case 'd': case 'e': case 'f':
-				return (uint8_t)(c - 'a') + (uint8_t)0xA;
-
-			default:
-				return (uint8_t)0x0;
+				tData.reserve(szReserve);
 			}
-		};
+		}
 
+		~DynamicArray(void) = default;
+
+		void Push(uint8_t u8Byte)
+		{
+			tData.push_back(std::bit_cast<typename T::value_type>(u8Byte));
+		}
+
+		const auto &Raw(void) const noexcept
+		{
+			return tData;
+		}
+	};
+
+private:
+	static constexpr uint8_t CharToHex(char c) noexcept
+	{
+		switch (c)
+		{
+		case '0': case '1': case '2': case '3': case '4':
+		case '5': case '6': case '7': case '8': case '9':
+			return (uint8_t)(c - '0') + (uint8_t)0x0;
+
+		case 'A': case 'B': case 'C':
+		case 'D': case 'E': case 'F':
+			return (uint8_t)(c - 'A') + (uint8_t)0xA;
+
+		case 'a': case 'b': case 'c':
+		case 'd': case 'e': case 'f':
+			return (uint8_t)(c - 'a') + (uint8_t)0xA;
+
+		default:
+			return (uint8_t)0x0;
+		}
+	}
+
+	static constexpr uint8_t CharsToHex(char h, char l) noexcept
+	{
 		return (CharToHex(h) & 0x0F) << 4 | (CharToHex(l) & 0x0F) << 0;
 	}
 
-	static consteval bool IsSpace(char c) noexcept
+	static constexpr bool IsSpace(char c) noexcept
 	{
 		switch (c)
 		{
@@ -113,24 +146,37 @@ private:
 		}
 	}
 
-	template<typename RetT, typename T>
-	static consteval auto Parse(const T *tpData, size_t szDataSize) noexcept
+	static constexpr bool IsDelimiter(char c) noexcept
 	{
-		RetT tRet{};
+		switch (c)
+		{
+		case ',': case '.': case ';': case ':':
+		case '`': case '|': case '\\': case '/':
+		case '-': case '_': case '\'': case '\"':
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	template<typename RetT, typename T>
+	static constexpr auto Parse(const T *tpData, size_t szDataSize, RetT tRet = {}) noexcept
+	{
 		size_t i = 0;
 
-		//»ñÈ¡Ò»¸ö·Ç¿Õ°××Ö·û
-		//µ«ÊÇÎªÊ²Ã´ÕâÀï²»ÓÃlambda¶øÒªÊ¹ÓÃºê¶¨ÒåÄØ£¿ÒòÎªÈı´ó¼Ò±àÒëÆ÷ÖĞ£¬
-		//Ö»ÓĞÒ»¼Ò²»Ö§³Ö´ø²¶»ñµÄ±àÒëÆÚlambda£¬ÊÇË­ÄØ£¬ºÃÄÑ²ÂÑ½~
+		//è·å–ä¸€ä¸ªéç©ºç™½å­—ç¬¦
+		//ä½†æ˜¯ä¸ºä»€ä¹ˆè¿™é‡Œä¸ç”¨lambdaè€Œè¦ä½¿ç”¨å®å®šä¹‰å‘¢ï¼Ÿå› ä¸ºä¸‰å¤§å®¶ç¼–è¯‘å™¨ä¸­ï¼Œ
+		//åªæœ‰ä¸€å®¶ä¸æ”¯æŒå¸¦æ•è·çš„ç¼–è¯‘æœŸlambdaï¼Œæ˜¯è°å‘¢ï¼Œå¥½éš¾çŒœå‘€~
 #define GetNoSpaceChar(c,...)\
-/*Ìø¹ı¿Õ°×*/\
+/*è·³è¿‡ç©ºç™½*/\
 {\
-	while (i < szDataSize && IsSpace(tpData[i]))/*×¢ÒâÕâÀïµÄIsSpace¶ÔÓÚ×Ö·û´®½áÎ²\0Ò²ÊÓ×÷¿Õ°×²¢Ìø¹ı*/\
+	/*æ³¨æ„è¿™é‡Œçš„IsSpaceå¯¹äºå­—ç¬¦ä¸²ç»“å°¾\0ä¹Ÿè§†ä½œç©ºç™½å¹¶è·³è¿‡*/\
+	while (i < szDataSize && (IsSpace(tpData[i]) || IsDelimiter(tpData[i])))\
 	{\
 		++i;\
 	}\
 	\
-	/*Èç¹ûÊÇÒòÎªi < sStr.Size()²»Âú×ã£¬¶ø²»ÊÇÓöµ½ÁËÒ»¸ö·Ç¿Õ°××Ö·ûÀë¿ªµÄwhile£¬ÔòÊ§°Ü*/\
+	/*å¦‚æœæ˜¯å› ä¸ºi < sStr.Size()ä¸æ»¡è¶³ï¼Œè€Œä¸æ˜¯é‡åˆ°äº†ä¸€ä¸ªéç©ºç™½å­—ç¬¦ç¦»å¼€çš„whileï¼Œåˆ™å¤±è´¥*/\
 	if (i >= szDataSize)\
 	{\
 		__VA_ARGS__;\
@@ -144,11 +190,11 @@ private:
 		{
 			char h, l;
 
-			GetNoSpaceChar(h);//¸ßÎ»²»´æÔÚÔòÍË³ö
-			GetNoSpaceChar(l,//µÍÎ»²»´æÔÚ£¬½öÓĞ¸ßÎ»
-				tRet.Push(CharsToHex(h, '0')));//µÍÎ»²¹0£¬È»ºóÍË³ö
+			GetNoSpaceChar(h);//é«˜ä½ä¸å­˜åœ¨åˆ™é€€å‡º
+			GetNoSpaceChar(l,//ä½ä½ä¸å­˜åœ¨ï¼Œä»…æœ‰é«˜ä½
+				tRet.Push(CharsToHex(h, '0')));//ä½ä½è¡¥0ï¼Œç„¶åé€€å‡º
 
-			//¸ßµÍÎ»ºÏ²¢
+			//é«˜ä½ä½åˆå¹¶
 			tRet.Push(CharsToHex(h, l));
 		}
 
@@ -161,5 +207,22 @@ public:
 	{
 		constexpr auto szArrSize = Parse<Counter>(sStr.data(), sStr.size());
 		return Parse<Array<T, szArrSize>>(sStr.data(), sStr.size());
+	}
+
+	static size_t ToHexArrLength(const std::string_view &viewStr)
+	{
+		return Parse<Counter>(viewStr.data(), viewStr.size());
+	}
+
+	template<typename RetT = std::vector<uint8_t>>
+	static auto ToHexArr(const std::string_view &viewStr, size_t szReserve = 0)
+	{
+		 return Parse<DynamicArray<RetT>>(viewStr.data(), viewStr.size(), { szReserve });
+	}
+
+	template<typename RetT = std::vector<uint8_t>, typename T = char>
+	static auto ToHexArr(const T *tpData, size_t szDataSize, size_t szReserve = 0)
+	{
+		return Parse<DynamicArray<RetT>>(tpData, szDataSize, { szReserve });
 	}
 };
