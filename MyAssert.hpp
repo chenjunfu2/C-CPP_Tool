@@ -34,7 +34,7 @@ inline void __MyAssert_Function__(const char *pFileName, size_t szLine, const ch
 //代理宏，延迟展开
 #define __MY_ASSERT_FILE__ __FILE__
 #define __MY_ASSERT_LINE__ __LINE__
-#define __MY_ASSERT_FUNC__ __FUNCSIG__//使用完整函数名
+#define __MY_ASSERT_FUNC__ __FUNCTION__//使用完整函数名
 
 
 #define MyAssert(v, ...) __MyAssert_Function__(__MY_ASSERT_FILE__, __MY_ASSERT_LINE__, __MY_ASSERT_FUNC__, (v), __VA_ARGS__)
