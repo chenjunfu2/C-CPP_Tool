@@ -3,8 +3,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-//inline防止重定义，_Printf_format_string_用于触发编译器参数类型匹配检查
-inline void __MyAssert_Function__(const char *pFileName, size_t szLine, const char *pFunctionName, bool bValid, _Printf_format_string_ const char *pInfo = NULL, ...)
+inline void __MyAssert_Function__(const char *pFileName, size_t szLine, const char *pFunctionName, bool bValid, const char *pInfo = NULL, ...)
 {
 	if (bValid)
 	{
@@ -36,5 +35,6 @@ inline void __MyAssert_Function__(const char *pFileName, size_t szLine, const ch
 #define __MY_ASSERT_LINE__ __LINE__
 #define __MY_ASSERT_FUNC__ __FUNCTION__
 
-
-#define MyAssert(v, ...) __MyAssert_Function__(__MY_ASSERT_FILE__, __MY_ASSERT_LINE__, __MY_ASSERT_FUNC__, (v), __VA_ARGS__)
+//cpp20 __VA_OPT__(,)，仅在__VA_ARGS__不为空时添加','以防止编译错误
+//msvc需启用/Zc:preprocessor以使得预处理器识别此宏关键字
+#define MyAssert(v, ...) __MyAssert_Function__(__MY_ASSERT_FILE__, __MY_ASSERT_LINE__, __MY_ASSERT_FUNC__, (v) __VA_OPT__(,) __VA_ARGS__)
