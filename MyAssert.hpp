@@ -1,7 +1,8 @@
 ﻿#pragma once
 
-#include <stdio.h>
-#include <stdarg.h>
+#include <stdio.h>//printf
+#include <stdlib.h>//exit
+#include <stdarg.h>//va_arg
 
 //必须没有提前定义过任何此类宏
 #if !defined(__COMPILER_MSVC__) &&\
