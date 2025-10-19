@@ -107,7 +107,7 @@ public:
 	{
 		//通过时差长度选择合适的单位
 		auto [enUnitType, ldTime] = GetOutputData(Diff<std::chrono::nanoseconds>().count());
-		printf("%s%.6lf%s%s", cpBegInfo, ldTime, strUnitType[enUnitType], cpEndInfo);
+		printf("%s%.6Lf%s%s", cpBegInfo, ldTime, strUnitType[enUnitType], cpEndInfo);
 	}
 
 	template<typename T = std::chrono::milliseconds>
