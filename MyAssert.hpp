@@ -5,38 +5,38 @@
 #include <stdarg.h>//va_arg
 
 //必须没有提前定义过任何此类宏
-#if !defined(__COMPILER_MSVC__) &&\
-	!defined(__COMPILER_GCC__) &&\
-	!defined(__COMPILER_CLANG__)
+#if !defined(COMPILER_MSVC) &&\
+	!defined(COMPILER_GCC) &&\
+	!defined(COMPILER_CLANG)
 
 	//先预定义所有可能的编译器宏
-	#define __COMPILER_MSVC__ 0
-	#define __COMPILER_GCC__ 0
-	#define __COMPILER_CLANG__ 0
+	#define COMPILER_MSVC 0
+	#define COMPILER_GCC 0
+	#define COMPILER_CLANG 0
 	
 	//后实际判断是哪个编译器，是就替换它自己的宏为1
 	#if defined(_MSC_VER)
-		#undef  __COMPILER_MSVC__
-		#define __COMPILER_MSVC__ 1
-		#define __COMPILER_NAME__ "MSVC"
+		#undef  COMPILER_MSVC
+		#define COMPILER_MSVC 1
+		#define COMPILER_NAME "MSVC"
 	#elif defined(__GNUC__)
-		#undef  __COMPILER_GCC__
-		#define __COMPILER_GCC__ 1
-		#define __COMPILER_NAME__ "GCC"
+		#undef  COMPILER_GCC
+		#define COMPILER_GCC 1
+		#define COMPILER_NAME "GCC"
 	#elif defined(__clang__)
-		#undef  __COMPILER_CLANG__
-		#define __COMPILER_CLANG__ 1
-		#define __COMPILER_NAME__ "Clang"
+		#undef  COMPILER_CLANG
+		#define COMPILER_CLANG 1
+		#define COMPILER_NAME "Clang"
 	#else
-		#define __COMPILER_NAME__ "Unknown"
+		#define COMPILER_NAME "Unknown"
 	#endif
 #endif
 
 
-#if __COMPILER_MSVC__
+#if COMPILER_MSVC
 #define PRINTF_FORMAT_ARGS _Printf_format_string_
 #define PRINTF_FORMAT_ATTR
-#elif __COMPILER_GCC__ || __COMPILER_CLANG__
+#elif COMPILER_GCC || COMPILER_CLANG
 #define PRINTF_FORMAT_ARGS
 #define PRINTF_FORMAT_ATTR __attribute__((__format__ (__printf__, 5, 6)))
 #else
@@ -70,7 +70,7 @@ inline void __MyAssert_Function__(const char *pFileName, size_t szLine, const ch
 	//帮忙换行
 	putchar('\n');
 
-	exit(-114514);
+	exit(-1);
 }
 
 //代理宏，延迟展开
@@ -85,7 +85,7 @@ inline void __MyAssert_Function__(const char *pFileName, size_t szLine, const ch
 #undef PRINTF_FORMAT_ATTR
 #undef PRINTF_FORMAT_ARGS
 
-#undef __COMPILER_NAME__
-#undef __COMPILER_CLANG__
-#undef __COMPILER_GCC__
-#undef __COMPILER_MSVC__
+#undef COMPILER_NAME
+#undef COMPILER_CLANG
+#undef COMPILER_GCC
+#undef COMPILER_MSVC
