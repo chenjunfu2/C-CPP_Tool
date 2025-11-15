@@ -17,7 +17,7 @@ class StrHexArray
 public:
 	template<typename T, size_t N>
 	requires(sizeof(T) == 1)
-		struct StringLiteral : public std::array<T, N>
+	struct StringLiteral : public std::array<T, N>
 	{
 	public:
 		using Super = std::array<T, N>;
