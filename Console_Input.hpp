@@ -213,9 +213,9 @@ public:
 	}
 
 	//等待任一按键被按下
-	static void WaitAnyKey(void) noexcept
+	static Key WaitAnyKey(void) noexcept
 	{
-		(void)GetTranslateKey();
+		return GetTranslateKey();
 	}
 
 	//判断缓冲区内是否存在按键
