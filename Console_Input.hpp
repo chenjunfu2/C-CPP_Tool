@@ -41,11 +41,12 @@ public:
 		size_t Hash() const noexcept
 		{
 			//正常情况下，u16KeyCode只会在0~255，而LeadCode只会在0~3
-			uint16_t u16KeyCode = u16KeyCode & 0x00FF;//去掉高8bit
-			uint16_t u16LeadCode = enLeadCode & 0x0003;//只留低2bit
+			uint16_t u16HashCode = 
+				(u16KeyCode & 0x00FF) |//留下低8bit
+				((enLeadCode & 0x0003) << 8);//把低2bit移动到8bit前面组成10bit
 
-			uint16_t u16HashCode = u16KeyCode | u16LeadCode << 8;//把2bit移动到8bit前面组成10bit
-			return std::hash<uint16_t>{}(u16HashCode);//求hash
+			//求hash
+			return std::hash<uint16_t>{}(u16HashCode);
 		}
 	};
 
