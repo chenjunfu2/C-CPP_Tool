@@ -57,7 +57,7 @@ public:
 		}
 	};
 
-	using CallBackFunc = long(const Key& stey);
+	using CallBackFunc = long(const Key& stKey);
 	using Func = std::function<CallBackFunc>;
 private:
 	std::unordered_map<Key, Func, KeyHash> mapRegisterTable;
@@ -181,15 +181,22 @@ public:
 		auto it = mapRegisterTable.find(stKetGet);
 		if (it == mapRegisterTable.end())
 		{
-			return 0;
+			return LONG_MIN;
 		}
 
 		//不为空则调用
-		long lRet = it->second(it->first);
-		if (lRet != 0)//不为0即为异常返回
+		return it->second(it->first);
+	}
+
+	long AtLeastOne(void) const
+	{
+		long lRet = 0;
+		do
 		{
-			return lRet;
-		}
+			lRet = Once();
+		} while (lRet == LONG_MIN);
+
+		return lRet;
 	}
 
 	//死循环处理按键并触发回调直到抛出异常或回调返回非0值
@@ -200,7 +207,7 @@ public:
 		do
 		{
 			lRet = Once();
-		} while (lRet == 0);
+		} while (lRet == LONG_MIN || lRet == 0);
 
 		return lRet;
 	}
