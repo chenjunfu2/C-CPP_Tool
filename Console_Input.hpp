@@ -1,9 +1,10 @@
-#pragma once
+ï»¿#pragma once
 
 #include <functional>
 #include <unordered_set>
 #include <unordered_map>
 #include <stdexcept>
+#include <optional>
 
 #include <stdio.h>
 #include <conio.h>
@@ -11,22 +12,26 @@
 #include <limits.h>
 #include <stdint.h>
 
+//ä¿è¯æœªå®šä¹‰çš„æƒ…å†µä¸‹æ‰å®šä¹‰ï¼Œä¸”åœ¨è‡ªå·±å®šä¹‰çš„æƒ…å†µä¸‹æ¸…é™¤å®šä¹‰
+#ifndef EOL
 #define EOL -1
+#define MY_DEF_EOL
+#endif // !EOL
 
-class Console_Input//ÓÃ»§½»»¥
+class Console_Input//ç”¨æˆ·äº¤äº’
 {
 public:
-	enum LeadCode : uint16_t//Ö¸¶¨u16ÀàĞÍ
+	enum LeadCode : uint16_t//æŒ‡å®šu16ç±»å‹
 	{
 		Code_NL = 0,
 		Code_00 = 1,
 		Code_E0 = 2,
 	};
 
-	struct Key//ÓÃÁ½¸öu16ÕâÑùKey¸ÕºÃÊÇ32bit
-	{//[Ç°µ¼×Ö½Ú][°´¼üÂë]
+	struct Key//ç”¨ä¸¤ä¸ªu16è¿™æ ·Keyåˆšå¥½æ˜¯32bit
+	{//[å‰å¯¼å­—èŠ‚][æŒ‰é”®ç ]
 		uint16_t u16KeyCode;
-		LeadCode enLeadCode = Code_NL;//´øÄ¬ÈÏÖµ·½±ãÖ»³õÊ¼»¯u16KeyCode
+		LeadCode enLeadCode = Code_NL;//å¸¦é»˜è®¤å€¼æ–¹ä¾¿åªåˆå§‹åŒ–u16KeyCode
 
 		bool operator==(const Key &_Right) const noexcept
 		{
@@ -40,12 +45,12 @@ public:
 
 		size_t Hash() const noexcept
 		{
-			//Õı³£Çé¿öÏÂ£¬u16KeyCodeÖ»»áÔÚ0~255£¬¶øLeadCodeÖ»»áÔÚ0~3
+			//æ­£å¸¸æƒ…å†µä¸‹ï¼Œu16KeyCodeåªä¼šåœ¨0~255ï¼Œè€ŒLeadCodeåªä¼šåœ¨0~3
 			uint16_t u16HashCode = 
-				(u16KeyCode & 0x00FF) |//ÁôÏÂµÍ8bit
-				((enLeadCode & 0x0003) << 8);//°ÑµÍ2bitÒÆ¶¯µ½8bitÇ°Ãæ×é³É10bit
+				(u16KeyCode & 0x00FF) |//ç•™ä¸‹ä½8bit
+				((enLeadCode & 0x0003) << 8);//æŠŠä½2bitç§»åŠ¨åˆ°8bitå‰é¢ç»„æˆ10bit
 
-			//Çóhash
+			//æ±‚hash
 			return std::hash<uint16_t>{}(u16HashCode);
 		}
 	};
@@ -66,24 +71,24 @@ public:
 	Console_Input(void) = default;
 	~Console_Input(void) = default;
 
-	//¿ÉÒÔÒÆ¶¯
+	//å¯ä»¥ç§»åŠ¨
 	Console_Input(Console_Input &&) = default;
 	Console_Input &operator = (Console_Input &&) = default;
 
-	//½ûÖ¹¿½±´
+	//ç¦æ­¢æ‹·è´
 	Console_Input(const Console_Input &) = delete;
 	Console_Input &operator = (const Console_Input &) = delete;
 
-	//²âÊÔ°´¼üµÄÖµ
-	[[noreturn]] static void KeyCodeTest(void) noexcept//º¯Êı²»»á·µ»Ø
+	//æµ‹è¯•æŒ‰é”®çš„å€¼
+	[[noreturn]] static void KeyCodeTest(void) noexcept//å‡½æ•°ä¸ä¼šè¿”å›
 	{
 		/*
-			ÉÏÏÂ×óÓÒ·½Ïò¼ü
-			0xE0¿ªÊ¼ºó¸ú
+			ä¸Šä¸‹å·¦å³æ–¹å‘é”®
+			0xE0å¼€å§‹åè·Ÿ
 				 0x48
 			0x4B 0x50 0x4D
 
-			¸´ºÏ°´¼ü²»ÊÇ0x00¿ªÍ·¾ÍÊÇ0xE0¿ªÍ·
+			å¤åˆæŒ‰é”®ä¸æ˜¯0x00å¼€å¤´å°±æ˜¯0xE0å¼€å¤´
 		*/
 		while (true)
 		{
@@ -91,63 +96,63 @@ public:
 		}
 	}
 
-	//×¢²á¼ü£¬ÖØ¸´×¢²áÔò×îĞÂµÄ°´¼üÌæ»»×î¾ÉµÄ
+	//æ³¨å†Œé”®ï¼Œé‡å¤æ³¨å†Œåˆ™æœ€æ–°çš„æŒ‰é”®æ›¿æ¢æœ€æ—§çš„
 	void RegisterKey(const Key &stKey, Func fFunc)
 	{
 		mapRegisterTable[stKey] = fFunc;
 	}
 
-	//Í¨¹ı¿½±´×¢²áÏàÍ¬¹¦ÄÜ°´¼ü
+	//é€šè¿‡æ‹·è´æ³¨å†Œç›¸åŒåŠŸèƒ½æŒ‰é”®
 	void CopyRegisteredKey(const Key &stTarget, const Key &stSource)
 	{
 		mapRegisterTable[stTarget] = mapRegisterTable[stSource];
 	}
 
-	//È¡Ïû×¢²á
+	//å–æ¶ˆæ³¨å†Œ
 	void UnRegisterKey(const Key &stKey) noexcept
 	{
 		mapRegisterTable.erase(stKey);
 	}
 
-	//²éÑ¯ÊÇ·ñÒÑ¾­×¢²á
+	//æŸ¥è¯¢æ˜¯å¦å·²ç»æ³¨å†Œ
 	bool IsKeyRegister(const Key &stKey) const noexcept
 	{
 		return mapRegisterTable.contains(stKey);
 	}
 
-	//ÖØÖÃËùÓĞÒÑ×¢²á°´¼ü
+	//é‡ç½®æ‰€æœ‰å·²æ³¨å†ŒæŒ‰é”®
 	void Reset(void) noexcept
 	{
 		mapRegisterTable.clear();
 	}
 
-	//»ñÈ¡°´¼ü×ªÒåÂë£¨Èç¹ûÓĞ×ªÒå£©²¢·µ»Ø
+	//è·å–æŒ‰é”®è½¬ä¹‰ç ï¼ˆå¦‚æœæœ‰è½¬ä¹‰ï¼‰å¹¶è¿”å›
 	static Key GetTranslateKey(void)
 	{
 		Key stKeyRet;
-		int iInput = _getch();//»ñÈ¡µÚÒ»´ÎÊäÈë
+		int iInput = _getch();//è·å–ç¬¬ä¸€æ¬¡è¾“å…¥
 		switch (iInput)
 		{
-		case 0x00://×ªÒå
+		case 0x00://è½¬ä¹‰
 			stKeyRet.enLeadCode = Code_00;
-			stKeyRet.u16KeyCode = _getch();//ÖØĞÂ»ñÈ¡
+			stKeyRet.u16KeyCode = _getch();//é‡æ–°è·å–
 			break;
-		case 0xE0://×ªÒå
+		case 0xE0://è½¬ä¹‰
 			stKeyRet.enLeadCode = Code_E0;
-			stKeyRet.u16KeyCode = _getch();//ÖØĞÂ»ñÈ¡
+			stKeyRet.u16KeyCode = _getch();//é‡æ–°è·å–
 			break;
 		case EOL:
 			throw std::runtime_error("Error: _getch() return EOL!");
-		default://Õı³£°´¼ü
+		default://æ­£å¸¸æŒ‰é”®
 			stKeyRet.enLeadCode = Code_NL;
-			stKeyRet.u16KeyCode = iInput;//²»ÓÃÖØĞÂ»ñÈ¡£¬Ö±½Ó¾ÍÊÇ°´¼ü
+			stKeyRet.u16KeyCode = iInput;//ä¸ç”¨é‡æ–°è·å–ï¼Œç›´æ¥å°±æ˜¯æŒ‰é”®
 			break;
 		}
 
 		return stKeyRet;
 	}
 
-	//µÈ´ıÒ»¸ö°´¼ü±»°´ÏÂ
+	//ç­‰å¾…ä¸€ä¸ªæŒ‰é”®è¢«æŒ‰ä¸‹
 	static void WaitForKey(Key stKeyWait)
 	{
 		Key stKeyGet;
@@ -156,11 +161,11 @@ public:
 			stKeyGet = GetTranslateKey();
 		} while (stKeyGet != stKeyWait);
 
-		//Ö´ĞĞµ½´ËËµÃ÷ÒÑ¾­µÈµ½Ä¿±ê¼ü
+		//æ‰§è¡Œåˆ°æ­¤è¯´æ˜å·²ç»ç­‰åˆ°ç›®æ ‡é”®
 		return;
 	}
 
-	//µÈ´ı¶à¸ö°´¼üÖĞµÄÈÎÒâÒ»¸ö±»°´ÏÂ²¢·µ»Ø°´ÏÂµÄ°´¼ü
+	//ç­‰å¾…å¤šä¸ªæŒ‰é”®ä¸­çš„ä»»æ„ä¸€ä¸ªè¢«æŒ‰ä¸‹å¹¶è¿”å›æŒ‰ä¸‹çš„æŒ‰é”®
 	static Key WaitForKeys(const std::unordered_set<Key, KeyHash> &setKeysWait)
 	{
 		Key stKeyGet;
@@ -169,61 +174,69 @@ public:
 			stKeyGet = GetTranslateKey();
 		} while (!setKeysWait.contains(stKeyGet));
 
-		//Ö´ĞĞµ½´ËËµÃ÷ÒÑ¾­µÈµ½ÈÎÒ»Ä¿±ê¼ü
-		return stKeyGet;//Ë³±ã·µ»ØÒ»ÏÂÈÃÓÃ»§ÖªµÀÊÇÄÄ¸ö
+		//æ‰§è¡Œåˆ°æ­¤è¯´æ˜å·²ç»ç­‰åˆ°ä»»ä¸€ç›®æ ‡é”®
+		return stKeyGet;//é¡ºä¾¿è¿”å›ä¸€ä¸‹è®©ç”¨æˆ·çŸ¥é“æ˜¯å“ªä¸ª
 	}
 
-	//´¦ÀíÒ»´Î°´¼ü²¢´¥·¢»Øµ÷²¢·µ»Ø»Øµ÷·µ»ØÖµ
-	long Once(void) const//²»±£Ö¤º¯Êı»á²»»áÅ×³öÒì³£
+	//ä»…å¤„ç†ä¸€æ¬¡æŒ‰é”®ï¼Œå¯èƒ½æŒ‰é”®æœªæ³¨å†Œï¼Œæ‰€ä»¥è¿”å›std::optional
+	std::optional<long> Once(void) const//ä¸ä¿è¯å‡½æ•°ä¼šä¸ä¼šæŠ›å‡ºå¼‚å¸¸
 	{
 		Key stKetGet = GetTranslateKey();
 
-		//»ñÈ¡º¯Êı
+		//è·å–å‡½æ•°
 		auto it = mapRegisterTable.find(stKetGet);
 		if (it == mapRegisterTable.end())
 		{
-			return LONG_MIN;
+			return {};//æ„é€ ç©ºoptional
 		}
 
-		//²»Îª¿ÕÔòµ÷ÓÃ
-		return it->second(it->first);
+		//ä¸ä¸ºç©ºåˆ™è°ƒç”¨
+		return { it->second(it->first) };
 	}
 
+	//ç­‰å¾…è‡³å°‘ä¸€æ¬¡æˆåŠŸçš„æŒ‰é”®è°ƒç”¨ï¼Œå¦‚æœæŒ‰é”®ä¸å­˜åœ¨åˆ™æŒç»­å¾ªç¯ï¼Œç›´åˆ°è‡³å°‘è§¦å‘ä¸€æ¬¡æ³¨å†Œçš„æŒ‰é”®è°ƒç”¨
+	//å› ä¸ºå¿…ç„¶è‡³å°‘æˆåŠŸä¸€æ¬¡ï¼Œæ‰€ä»¥è¿”å›å…¶ä¸­çš„å€¼ï¼Œè€Œä¸æ˜¯std::optional
 	long AtLeastOne(void) const
 	{
-		long lRet = 0;
+		std::optional<long> lRet{};
 		do
 		{
 			lRet = Once();
-		} while (lRet == LONG_MIN);
+		} while (!lRet.has_value());//ä¸ºç©ºåˆ™æŒç»­å¾ªç¯ç›´åˆ°æˆåŠŸ
 
-		return lRet;
+		return lRet.value();
 	}
 
-	//ËÀÑ­»·´¦Àí°´¼ü²¢´¥·¢»Øµ÷Ö±µ½Å×³öÒì³£»ò»Øµ÷·µ»Ø·Ç0Öµ
+	//å¾ªç¯å¤„ç†æŒ‰é”®å¹¶è§¦å‘å›è°ƒï¼Œç›´åˆ°æŠ›å‡ºå¼‚å¸¸æˆ–å›è°ƒè¿”å›é0å€¼
+	//å› ä¸ºå¿…ç„¶è‡³å°‘æˆåŠŸä¸€æ¬¡ï¼Œæ‰€ä»¥è¿”å›å…¶ä¸­çš„å€¼ï¼Œè€Œä¸æ˜¯std::optional
 	long Loop(void) const
 	{
-		long lRet = 0;
+		std::optional<long> lRet{};
 
 		do
 		{
 			lRet = Once();
-		} while (lRet == LONG_MIN || lRet == 0);
+		} while (!lRet.has_value() || lRet.value() == 0);
 
-		return lRet;
+		return lRet.value();
 	}
 
-	//µÈ´ıÈÎÒ»°´¼ü±»°´ÏÂ
+	//ç­‰å¾…ä»»ä¸€æŒ‰é”®è¢«æŒ‰ä¸‹
 	static Key WaitAnyKey(void) noexcept
 	{
 		return GetTranslateKey();
 	}
 
-	//ÅĞ¶Ï»º³åÇøÄÚÊÇ·ñ´æÔÚ°´¼ü
+	//åˆ¤æ–­ç¼“å†²åŒºå†…æ˜¯å¦å­˜åœ¨æŒ‰é”®
 	static bool InputExists(void) noexcept
 	{
 		return _kbhit() != 0;
 	}
+
 };
 
+//é˜²æ­¢æ³„éœ²
+#ifdef MY_DEF_EOL
 #undef EOL
+#undef MY_DEF_EOL
+#endif // MY_DEF_EOL
