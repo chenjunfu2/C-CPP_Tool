@@ -46,13 +46,8 @@
 
 
 PRINTF_FORMAT_ATTR
-inline void __MyAssert_Function__(const char *pFileName, size_t szLine, const char *pFunctionName, bool bValid, PRINTF_FORMAT_ARGS const char *pInfo = NULL, ...)
+inline void MyAssert_Function(const char *pFileName, size_t szLine, const char *pFunctionName, PRINTF_FORMAT_ARGS const char *pInfo = NULL, ...)
 {
-	if (bValid)
-	{
-		return;//校验成功返回
-	}
-
 	printf("Assertion Failure!\n    in file: %s\n    in line: %zu\n    in func: %s\n    in info: ", pFileName, szLine, pFunctionName);
 	
 	if (pInfo != NULL)
@@ -74,13 +69,21 @@ inline void __MyAssert_Function__(const char *pFileName, size_t szLine, const ch
 }
 
 //代理宏，延迟展开
-#define __MY_ASSERT_FILE__ __FILE__
-#define __MY_ASSERT_LINE__ __LINE__
-#define __MY_ASSERT_FUNC__ __FUNCTION__
+#define MY_ASSERT_FILE __FILE__
+#define MY_ASSERT_LINE __LINE__
+#define MY_ASSERT_FUNC __FUNCTION__
 
 //cpp20的__VA_OPT__(,)，仅在__VA_ARGS__不为空时添加','以防止编译错误
 //msvc需启用"/Zc:preprocessor"以使得预处理器识别此宏关键字（哎呀msvc你怎么这么坏呀）
-#define MyAssert(v, ...) __MyAssert_Function__(__MY_ASSERT_FILE__, __MY_ASSERT_LINE__, __MY_ASSERT_FUNC__, (v) __VA_OPT__(,) __VA_ARGS__)
+#define MyAssert(v, ...)\
+do\
+{\
+	if(!(v))\
+	{\
+		MyAssert_Function(MY_ASSERT_FILE, MY_ASSERT_LINE, MY_ASSERT_FUNC __VA_OPT__(, ) __VA_ARGS__);\
+	}\
+}while(0)
+
 
 #undef PRINTF_FORMAT_ATTR
 #undef PRINTF_FORMAT_ARGS

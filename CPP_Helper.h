@@ -9,8 +9,8 @@ class_name &operator=(const class_name &_Copy) = keyword;
 
 //类-移动-构造与赋值
 #define CLASS_MOVE_FUNC(class_name, keyword)\
-class_name(class_name &&_Move) = keyword;\
-class_name &operator=(class_name &&_Move) = keyword;
+class_name(class_name &&_Move) noexcept = keyword;\
+class_name &operator=(class_name &&_Move) noexcept = keyword;
 
 //类-无参构造
 #define CLASS_CONSTRUCTOR(class_name, keyword)\
