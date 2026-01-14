@@ -2,14 +2,20 @@
 
 #include <type_traits>
 
-//类-拷贝-构造与赋值
-#define CLASS_COPY_FUNC(class_name, keyword)\
-class_name(const class_name &_Copy) = keyword;\
+//类-拷贝构造
+#define CLASS_COPY_CONSTRUCTOR(class_name, keyword)\
+class_name(const class_name &_Copy) = keyword;
+
+//类-拷贝赋值
+#define CLASS_COPY_OPERATOR(class_name, keyword)\
 class_name &operator=(const class_name &_Copy) = keyword;
 
-//类-移动-构造与赋值
-#define CLASS_MOVE_FUNC(class_name, keyword)\
-class_name(class_name &&_Move) noexcept = keyword;\
+//类-移动-构造
+#define CLASS_MOVE_CONSTRUCTOR(class_name, keyword)\
+class_name(class_name &&_Move) noexcept = keyword;
+
+//类-移动赋值
+#define CLASS_MOVE_OPERATOR(class_name, keyword)\
 class_name &operator=(class_name &&_Move) noexcept = keyword;
 
 //类-无参构造
@@ -23,11 +29,13 @@ class_name(void) = keyword;
 
 //默认-拷贝相关
 #define DEFAULT_COPY(class_name)\
-CLASS_COPY_FUNC(class_name, default)
+CLASS_COPY_CONSTRUCTOR(class_name, default)\
+CLASS_COPY_OPERATOR(class_name, default)
 
 //默认-移动相关
 #define DEFAULT_MOVE(class_name)\
-CLASS_MOVE_FUNC(class_name, default)
+CLASS_MOVE_CONSTRUCTOR(class_name, default)\
+CLASS_MOVE_OPERATOR(class_name, default)
 
 //默认-无参构造
 #define DEFAULT_DSTC(class_name)\
@@ -40,11 +48,13 @@ CLASS_CONSTRUCTOR(class_name, default)
 
 //删除-拷贝相关
 #define DELETE_COPY(class_name)\
-CLASS_COPY_FUNC(class_name, delete)
+CLASS_COPY_CONSTRUCTOR(class_name, delete)\
+CLASS_COPY_OPERATOR(class_name, delete)
 
 //删除-移动相关
 #define DELETE_MOVE(class_name)\
-CLASS_MOVE_FUNC(class_name, delete)
+CLASS_MOVE_CONSTRUCTOR(class_name, delete)\
+CLASS_MOVE_OPERATOR(class_name, delete)
 
 //删除-无参构造
 #define DELETE_DSTC(class_name)\
@@ -57,19 +67,15 @@ CLASS_CONSTRUCTOR(class_name, delete)
 
 //虚函数-拷贝相关
 #define VIRTUAL_COPY(class_name)\
-CLASS_COPY_FUNC(class_name, 0)
+virtual CLASS_COPY_OPERATOR(class_name, 0)
 
 //虚函数-移动相关
 #define VIRTUAL_MOVE(class_name)\
-CLASS_MOVE_FUNC(class_name, 0)
+virtual CLASS_MOVE_OPERATOR(class_name, 0)
 
 //虚函数-无参构造
 #define VIRTUAL_DSTC(class_name)\
-CLASS_DESTRUCTOR(class_name, 0)
-
-//虚函数-无参析构
-#define VIRTUAL_CSTC(class_name)\
-CLASS_CONSTRUCTOR(class_name, 0)
+virtual CLASS_DESTRUCTOR(class_name, 0)
 
 
 //默认-拷贝与移动相关
@@ -111,16 +117,16 @@ typename std::remove_reference_t<decltype(member_name)> Get##func_name(void) con
 
 //设置-拷贝
 #define SETTER_COPY(func_name, member_name)\
-void Set##func_name(const typename std::remove_reference_t<decltype(member_name)> &_member_name)\
+void Set##func_name(const typename std::remove_reference_t<decltype(member_name)> &_##member_name)\
 {\
-	member_name = _member_name;\
+	member_name = _##member_name;\
 }
 
 //设置-移动
 #define SETTER_MOVE(func_name, member_name)\
-void Set##func_name(typename std::remove_reference_t<decltype(member_name)> &&_member_name) noexcept\
+void Set##func_name(typename std::remove_reference_t<decltype(member_name)> &&_##member_name) noexcept\
 {\
-	member_name = std::move(_member_name);\
+	member_name = std::move(_##member_name);\
 }
 
 //获取-引用与常量引用
