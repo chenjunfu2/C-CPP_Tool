@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include <stdio.h>//printf
-#include <stdlib.h>//exit
+#include <stdlib.h>//abort
 #include <stdarg.h>//va_arg
 
 //必须没有提前定义过任何此类宏
@@ -38,7 +38,7 @@
 #define PRINTF_FORMAT_ATTR
 #elif COMPILER_GCC || COMPILER_CLANG
 #define PRINTF_FORMAT_ARGS
-#define PRINTF_FORMAT_ATTR __attribute__((__format__ (__printf__, 4, 5)))
+#define PRINTF_FORMAT_ATTR __attribute__((__format__ (__printf__, 5, 6)))
 #else
 #define PRINTF_FORMAT_ARGS
 #define PRINTF_FORMAT_ATTR
@@ -46,10 +46,16 @@
 
 
 PRINTF_FORMAT_ATTR
-inline void MyAssert_Function(const char *pFileName, size_t szLine, const char *pFunctionName, PRINTF_FORMAT_ARGS const char *pInfo = NULL, ...)
+inline void MyAssert_Function(const char *pFileName, size_t szLine, const char *pFunctionName, const char *pExpressionName, PRINTF_FORMAT_ARGS const char *pInfo = NULL, ...)
 {
-	printf("Assertion Failure!\n    in file: %s\n    in line: %zu\n    in func: %s\n    in info: ", pFileName, szLine, pFunctionName);
-	
+	printf(
+		"------------------\n"
+		"Assertion Failure!\n"
+		"    Expr: %s\n"
+		"    Info: ",
+		pExpressionName
+	);
+
 	if (pInfo != NULL)
 	{
 		va_list vl;
@@ -59,13 +65,22 @@ inline void MyAssert_Function(const char *pFileName, size_t szLine, const char *
 	}
 	else
 	{
-		printf("[No Info]");
+		printf("<None>");
 	}
-	
-	//帮忙换行
-	putchar('\n');
 
-	exit(-1);
+	printf(
+		"\n"
+		"At:\n"
+		"    File: %s\n"
+		"    Line: %zu\n"
+		"    Func: %s\n"
+		"------------------\n",
+		pFileName,
+		szLine,
+		pFunctionName
+	);
+
+	abort();
 }
 
 //代理宏，延迟展开
@@ -75,12 +90,12 @@ inline void MyAssert_Function(const char *pFileName, size_t szLine, const char *
 
 //cpp20的__VA_OPT__(,)，仅在__VA_ARGS__不为空时添加','以防止编译错误
 //msvc需启用"/Zc:preprocessor"以使得预处理器识别此宏关键字（哎呀msvc你怎么这么坏呀）
-#define MyAssert(v, ...)\
+#define MyAssert(expr, ...)\
 do\
 {\
-	if(!(v))\
+	if(!(expr))\
 	{\
-		MyAssert_Function(MY_ASSERT_FILE, MY_ASSERT_LINE, MY_ASSERT_FUNC __VA_OPT__(, ) __VA_ARGS__);\
+		MyAssert_Function(MY_ASSERT_FILE, MY_ASSERT_LINE, MY_ASSERT_FUNC, #expr __VA_OPT__(, ) __VA_ARGS__);\
 	}\
 }while(0)
 
