@@ -20,13 +20,16 @@ struct ErrorTraits;
 //	}
 //};
 
-template<class T>
-concept BareType = std::same_as<T, std::remove_cvref_t<T>>;
+template<typename T>
+using Bare_T = std::remove_cvref_t<T>;
+
+template<typename T>
+concept Is_Bare = std::same_as<T, Bare_T<T>>;
 
 template<typename To, typename From>
 concept Error_Convertible =
-BareType<To> &&
-(std::same_as<std::remove_cvref_t<To>, std::decay_t<From>> ||
+Is_Bare<To> &&
+(std::same_as<Bare_T<To>, std::decay_t<From>> ||
 requires(From &&e)
 {
 	{
@@ -34,48 +37,48 @@ requires(From &&e)
 	} -> std::same_as<To>;
 });
 
-template<class R>
+template<typename R>
 struct ResultTraits;
 
 template<typename V, typename E>
 requires
 (
-	!std::same_as<std::remove_cvref_t<E>, void> &&
-	(BareType<V> && BareType<E>)
+	!std::same_as<Bare_T<E>, void> &&
+	(Is_Bare<V> && Is_Bare<E>)
 )
 class [[nodiscard]] Result;
 
-template<class V, class E>
+template<typename V, typename E>
 struct ResultTraits<Result<V, E>>
 {
 	using ValType = V;
 	using ErrType = E;
 };
 
-template<class R>
+template<typename R>
 concept Is_Result =
 requires
 {
-	typename ResultTraits<std::remove_cvref_t<R>>::ValType;
-	typename ResultTraits<std::remove_cvref_t<R>>::ErrType;
+	typename ResultTraits<Bare_T<R>>::ValType;
+	typename ResultTraits<Bare_T<R>>::ErrType;
 };
 
 template<typename E>
-requires(BareType<E>)
+requires(Is_Bare<E>)
 struct ErrorWrapper
 {
-	using ErrType = std::remove_cvref_t<E>;
+	using ErrType = Bare_T<E>;
 	ErrType e;
 };
 
-template<class To, class From>
+template<typename To, typename From>
 requires(Error_Convertible<To, From>)
 static To ConvertError(From &&e)
 noexcept
 (
 	[]() -> bool
 	{
-		if constexpr (std::same_as<std::remove_cvref_t<To>, std::decay_t<From>>)
+		if constexpr (std::same_as<Bare_T<To>, std::decay_t<From>>)
 		{
 			return noexcept(To{ std::declval<From>() });
 		}
@@ -87,7 +90,7 @@ noexcept
 	}()
 )
 {
-	if constexpr (std::same_as<std::remove_cvref_t<To>, std::decay_t<From>>)
+	if constexpr (std::same_as<Bare_T<To>, std::decay_t<From>>)
 	{
 		return To{ std::forward<From>(e) };
 	}
@@ -118,24 +121,24 @@ struct DummyResult
 template<typename V, typename E>
 requires
 (
-	!std::same_as<std::remove_cvref_t<E>, void> &&
-	(BareType<V> && BareType<E>)
+	!std::same_as<Bare_T<E>, void> &&
+	(Is_Bare<V> && Is_Bare<E>)
 )
 class [[nodiscard]] Result
 {
 	template<typename V, typename E>
 	requires
 	(
-		!std::same_as<std::remove_cvref_t<E>, void> &&
-		(BareType<V> &&BareType<E>)
+		!std::same_as<Bare_T<E>, void> &&
+		(Is_Bare<V> &&Is_Bare<E>)
 	)
 	friend class Result;
 public:
-	static inline constexpr bool IsVoidValue = std::same_as<std::remove_cvref_t<V>, void>;
+	static inline constexpr bool IsVoidValue = std::same_as<Bare_T<V>, void>;
 
-	using ValType = std::remove_cvref_t<V>;
+	using ValType = Bare_T<V>;
 	using StorageType = std::conditional_t<IsVoidValue, DummyResult, ValType>;
-	using ErrType = std::remove_cvref_t<E>;
+	using ErrType = Bare_T<E>;
 
 protected:
 	union
@@ -208,8 +211,8 @@ public:
 	template<typename E2>
 	requires
 	(
-		BareType<E2> &&
-		(std::same_as<ErrType, std::remove_cvref_t<E2>> ||
+		Is_Bare<E2> &&
+		(std::same_as<ErrType, Bare_T<E2>> ||
 		Error_Convertible<ErrType, const E2&>)
 	)
 	void Replace(const ErrorWrapper<E2> &_err) noexcept
@@ -228,8 +231,8 @@ public:
 	template<typename E2>
 	requires
 	(
-		BareType<E2> &&
-		(std::same_as<ErrType, std::remove_cvref_t<E2>> ||
+		Is_Bare<E2> &&
+		(std::same_as<ErrType, Bare_T<E2>> ||
 		Error_Convertible<ErrType, E2&&>)
 	)
 	void Replace(ErrorWrapper<E2> &&_err) noexcept
@@ -417,7 +420,7 @@ public:
 	requires(Error_Convertible<ErrType, const E2&>)
 	Result &operator=(const Result<ValType, E2> &_other) noexcept
 	{
-		if constexpr (std::same_as<std::remove_cvref_t<ErrType>, std::decay_t<const E2 &>>)
+		if constexpr (std::same_as<Bare_T<ErrType>, std::decay_t<const E2 &>>)
 		{
 			if (this == std::addressof(_other))
 			{
@@ -441,7 +444,7 @@ public:
 	requires(Error_Convertible<ErrType, E2&&>)
 	Result &operator=(Result<ValType, E2> &&_other) noexcept
 	{
-		if constexpr (std::same_as<std::remove_cvref_t<ErrType>, std::decay_t<E2&&>>)
+		if constexpr (std::same_as<Bare_T<ErrType>, std::decay_t<E2&&>>)
 		{
 			if (this == std::addressof(_other))
 			{
@@ -583,7 +586,7 @@ public:
 	}
 
 	template<typename F>
-	requires(BareType<ResultInvokeTraits_T<F, ValType>>)
+	requires(Is_Bare<ResultInvokeTraits_T<F, ValType>>)
 	auto MapValue(F &&_func) &&
 	noexcept
 	(
@@ -592,7 +595,7 @@ public:
 			using V2 = ResultInvokeTraits_T<F, ValType>;
 
 			bool bRet = noexcept(Result<V2, ErrType>{ ErrorWrapper<ErrType>{ std::declval<ErrType &&>() } });
-			if constexpr (std::same_as<std::remove_cvref_t<V2>, void>)
+			if constexpr (std::same_as<Bare_T<V2>, void>)
 			{
 				if constexpr (IsVoidValue)
 				{
@@ -623,7 +626,7 @@ public:
 
 		if (bIsOk)
 		{
-			if constexpr (std::same_as<std::remove_cvref_t<V2>, void>)
+			if constexpr (std::same_as<Bare_T<V2>, void>)
 			{
 				if constexpr (IsVoidValue)
 				{
@@ -655,7 +658,7 @@ public:
 	}
 
 	template<typename F>
-	requires(BareType<std::invoke_result_t<F, ErrType &&>>)
+	requires(Is_Bare<std::invoke_result_t<F, ErrType &&>>)
 	auto MapError(F &&_func) &&
 	noexcept
 	(
@@ -676,7 +679,7 @@ public:
 	}
 
 	template<typename F>
-	requires(BareType<ResultInvokeTraits_T<F, ValType>> && Is_Result<ResultInvokeTraits_T<F, ValType>>)
+	requires(Is_Bare<ResultInvokeTraits_T<F, ValType>> && Is_Result<ResultInvokeTraits_T<F, ValType>>)
 	auto AndThen(F &&_func) &&
 	noexcept
 	(
@@ -719,9 +722,9 @@ public:
 	template<typename F>
 	requires
 	(
-		BareType<std::invoke_result_t<F, ErrType &&>> &&
+		Is_Bare<std::invoke_result_t<F, ErrType &&>> &&
 		Is_Result<std::invoke_result_t<F, ErrType &&>> &&
-		std::same_as<ValType, std::remove_cvref_t<typename std::invoke_result_t<F, ErrType &&>::ValType>>
+		std::same_as<ValType, Bare_T<typename std::invoke_result_t<F, ErrType &&>::ValType>>
 	)
 	auto OrElse(F &&_func) &&
 	noexcept
@@ -743,7 +746,7 @@ public:
 	}
 };
 
-template<class V>
+template<typename V>
 std::decay_t<V> ResultOk(V &&_value)
 {
 	return _value;//use implicit move
@@ -754,7 +757,7 @@ DummyResult ResultOk(void)
 	return DummyResult{};//use dummy
 }
 
-template<class E>
+template<typename E>
 ErrorWrapper<std::decay_t<E>> ResultErr(E &&_error)
 {
 	return ErrorWrapper<std::decay_t<E>>{ std::forward<E>(_error) };//use wrapper
