@@ -210,18 +210,18 @@ public:
 	(
 		BareType<E2> &&
 		(std::same_as<ErrType, std::remove_cvref_t<E2>> ||
-		std::constructible_from<ErrType, const E2&> && std::assignable_from<ErrType&, const E2&>)
+		Error_Convertible<ErrType, const E2&>)
 	)
 	void Replace(const ErrorWrapper<E2> &_err) noexcept
 	{
 		if (!bIsOk)
 		{
-			e = _err.e;
+			e = ConvertError<ErrType>(_err.e);
 			return;
 		}
 
 		std::destroy_at(&v);
-		std::construct_at(&e, _err.e);
+		std::construct_at(&e, ConvertError<ErrType>(_err.e));
 		bIsOk = false;
 	}
 
@@ -230,18 +230,18 @@ public:
 	(
 		BareType<E2> &&
 		(std::same_as<ErrType, std::remove_cvref_t<E2>> ||
-		std::constructible_from<ErrType, E2&&> && std::assignable_from<ErrType&, E2&&>)
+		Error_Convertible<ErrType, E2&&>)
 	)
 	void Replace(ErrorWrapper<E2> &&_err) noexcept
 	{
 		if (!bIsOk)
 		{
-			e = std::move(_err.e);
+			e = ConvertError<ErrType>(std::move(_err.e));
 			return;
 		}
 
 		std::destroy_at(&v);
-		std::construct_at(&e, std::move(_err.e));
+		std::construct_at(&e, ConvertError<ErrType>(std::move(_err.e)));
 		bIsOk = false;
 	}
 
@@ -266,15 +266,15 @@ public:
 	{}
 
 	template<typename E2>
-	requires(std::constructible_from<ErrType, const E2&>)
-	Result(const ErrorWrapper<E2> &_err) noexcept(std::is_nothrow_constructible_v<ErrType, const E2&>)
-		: e(_err.e), bIsOk(false)
+	requires(Error_Convertible<ErrType, const E2&>)
+	Result(const ErrorWrapper<E2> &_err) noexcept(noexcept(ConvertError<ErrType>(std::declval<const E2 &>())))
+		: e(ConvertError<ErrType>(_err.e)), bIsOk(false)
 	{}
 
 	template<typename E2>
-	requires(std::constructible_from<ErrType, E2&&>)
-	Result(ErrorWrapper<E2> &&_err) noexcept(std::is_nothrow_constructible_v<ErrType, E2 &&>)
-		: e(std::move(_err.e)), bIsOk(false)
+	requires(Error_Convertible<ErrType, E2&&>)
+	Result(ErrorWrapper<E2> &&_err) noexcept(noexcept(ConvertError<ErrType>(std::declval<E2 &&>())))
+		: e(ConvertError<ErrType>(std::move(_err.e))), bIsOk(false)
 	{}
 
 	Result(const Result &_other) noexcept(noexcept(std::construct_at(&v, _other.v)) && noexcept(std::construct_at(&e, _other.e)))
@@ -360,7 +360,7 @@ public:
 	}
 
 	template<typename E2>
-	requires(std::constructible_from<ErrType, const E2&> && std::assignable_from<ErrType&, const E2&>)
+	requires(Error_Convertible<ErrType, const E2&>)
 	Result &operator=(const ErrorWrapper<E2> &_err) noexcept
 	{
 		Replace(_err);
@@ -368,7 +368,7 @@ public:
 	}
 
 	template<typename E2>
-	requires(std::constructible_from<ErrType, E2&&> && std::assignable_from<ErrType&, E2&&>)
+	requires(Error_Convertible<ErrType, E2&&>)
 	Result &operator=(ErrorWrapper<E2> &&_err) noexcept
 	{
 		Replace(std::move(_err));
@@ -431,7 +431,7 @@ public:
 		}
 		else
 		{
-			Replace(ErrorWrapper<ErrType>{ ConvertError<ErrType>(_other.e) });
+			Replace(ErrorWrapper<E2>{ _other.e });
 		}
 
 		return *this;
@@ -455,7 +455,7 @@ public:
 		}
 		else
 		{
-			Replace(ErrorWrapper<ErrType>{ ConvertError<ErrType>(std::move(_other.e)) });
+			Replace(ErrorWrapper<E2>{ std::move(_other.e) });
 		}
 
 		return *this;
@@ -765,7 +765,7 @@ ErrorWrapper<std::decay_t<E>> ResultErr(E &&_error)
 auto name##_result = (expr);\
 if (name##_result.IsErr())\
 {\
-	return std::move(name##_result);\
+	return ResultErr(std::move(name##_result).UnwrapError());\
 }\
 auto name = std::move(name##_result).UnwrapValue();
 #endif // !RESULT_TRY_ASSIGN
@@ -776,7 +776,7 @@ do\
 {\
 	if (auto _result = (expr); _result.IsErr())\
 	{\
-		return std::move(_result);\
+		return ResultErr(std::move(_result).UnwrapError());\
 	}\
 } while(false)
 #endif // !RESULT_TRY
