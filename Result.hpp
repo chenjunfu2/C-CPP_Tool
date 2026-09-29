@@ -134,7 +134,7 @@ class [[nodiscard]] Result
 	)
 	friend class Result;
 public:
-	static inline constexpr bool IsVoidValue = std::same_as<Bare_T<V>, void>;
+	static inline constexpr bool IsVoidValue = std::is_void_v<V>;
 
 	using ValType = Bare_T<V>;
 	using StorageType = std::conditional_t<IsVoidValue, DummyResult, ValType>;
