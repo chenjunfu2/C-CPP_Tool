@@ -9,6 +9,8 @@
 #include <utility>
 #include <memory>
 
+namespace CppResult
+{
 
 template<typename To>
 struct ErrorTraits
@@ -1809,3 +1811,5 @@ do\
 	}\
 } while(false)
 #endif // !RESULT_TRY
+
+}
