@@ -137,12 +137,17 @@ concept NeqComparable = requires(T a, U b)
 };
 
 template<typename T>
-concept HasFailInfo = requires(T)
+concept HasFailInfo = requires
 {
 	typename T::HasResultFailInfo;//标签
+};
+
+template<typename T>
+concept TestFailInfoFunc = requires
+{
 	{
 		T::ResultFailInfo("test info")//调用测试
-	} -> std::same_as<void>;
+	} noexcept -> std::same_as<void>;
 };
 
 template<typename TD, typename TC, typename ...Args>
@@ -207,6 +212,17 @@ public:
 	using ErrType = Bare_T<E>;
 
 protected:
+	[[noreturn]] static void Abort(const char *info) noexcept
+	{
+		if constexpr (HasFailInfo<ErrType>)
+		{
+			static_assert(TestFailInfoFunc<ErrType>, "ResultFailInfo function does not meet the requirements");
+			ErrType::ResultFailInfo(info);
+		}
+
+		std::terminate();
+	}
+
 	union
 	{
 		StorageType v;
@@ -1209,12 +1225,7 @@ public:
 	{
 		if (!bIsOk)
 		{
-			if constexpr (HasFailInfo<ErrType>)
-			{
-				ErrType::ResultFailInfo("Cannot extract the success value from a failed Result");
-			}
-
-			std::terminate();
+			Abort("Cannot extract the success value from a failed Result");
 		}
 
 		return v;
@@ -1225,12 +1236,7 @@ public:
 	{
 		if (!bIsOk)
 		{
-			if constexpr (HasFailInfo<ErrType>)
-			{
-				ErrType::ResultFailInfo("Cannot extract the success value from a failed Result");
-			}
-
-			std::terminate();
+			Abort("Cannot extract the success value from a failed Result");
 		}
 
 		return v;
@@ -1241,12 +1247,7 @@ public:
 	{
 		if (!bIsOk)
 		{
-			if constexpr (HasFailInfo<ErrType>)
-			{
-				ErrType::ResultFailInfo("Cannot extract the success value from a failed Result");
-			}
-
-			std::terminate();
+			Abort("Cannot extract the success value from a failed Result");
 		}
 
 		return std::move(v);
@@ -1257,12 +1258,7 @@ public:
 	{
 		if (!bIsOk)
 		{
-			if constexpr (HasFailInfo<ErrType>)
-			{
-				ErrType::ResultFailInfo("Cannot extract the success value from a failed Result");
-			}
-
-			std::terminate();
+			Abort("Cannot extract the success value from a failed Result");
 		}
 
 		return std::move(v);
@@ -1272,12 +1268,7 @@ public:
 	{
 		if (bIsOk)
 		{
-			if constexpr (HasFailInfo<ErrType>)
-			{
-				ErrType::ResultFailInfo("Cannot extract the error value from a successful Result");
-			}
-
-			std::terminate();
+			Abort("Cannot extract the error value from a successful Result");
 		}
 
 		return e;
@@ -1287,12 +1278,7 @@ public:
 	{
 		if (bIsOk)
 		{
-			if constexpr (HasFailInfo<ErrType>)
-			{
-				ErrType::ResultFailInfo("Cannot extract the error value from a successful Result");
-			}
-
-			std::terminate();
+			Abort("Cannot extract the error value from a successful Result");
 		}
 
 		return e;
@@ -1302,12 +1288,7 @@ public:
 	{
 		if (bIsOk)
 		{
-			if constexpr (HasFailInfo<ErrType>)
-			{
-				ErrType::ResultFailInfo("Cannot extract the error value from a successful Result");
-			}
-
-			std::terminate();
+			Abort("Cannot extract the error value from a successful Result");
 		}
 
 		return std::move(e);
@@ -1317,12 +1298,7 @@ public:
 	{
 		if (bIsOk)
 		{
-			if constexpr (HasFailInfo<ErrType>)
-			{
-				ErrType::ResultFailInfo("Cannot extract the error value from a successful Result");
-			}
-
-			std::terminate();
+			Abort("Cannot extract the error value from a successful Result");
 		}
 
 		return std::move(e);

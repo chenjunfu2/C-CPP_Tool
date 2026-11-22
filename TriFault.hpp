@@ -255,7 +255,7 @@ namespace tf
 		}
 
 		using HasResultFailInfo = void;//标签
-		static void ResultFailInfo(const char *err)//Result错误信息反馈接口
+		static void ResultFailInfo(const char *err) noexcept//Result错误信息反馈接口
 		{
 			constexpr bool ResultFail = false;
 			MyAssert(ResultFail, err);
