@@ -213,7 +213,7 @@ namespace tf
 			return isRecoverable;
 		}
 
-		std::string ToString(void) const
+		[[nodiscard]] std::string ToString(void) const
 		{
 			MyAssert(!isRecoverable, "Cannot format trace to string for a Recoverable error");
 			std::string out = "Fatal Error!\n";
