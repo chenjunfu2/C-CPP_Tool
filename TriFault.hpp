@@ -25,7 +25,7 @@ namespace tr
 
 
 	template<typename RecoverableContext>
-	requires(std::is_nothrow_destructible_v<RecoverableContext>)
+	requires(std::same_as<std::remove_cvref_t<RecoverableContext>, RecoverableContext> && std::is_nothrow_destructible_v<RecoverableContext>)
 	struct Error//只存储Recoverable和回溯Fatal，Logic走Assert宏
 	{
 	public:
@@ -225,7 +225,13 @@ namespace tr
 			MyAssert(!isRecoverable, "Cannot format trace to string for a Recoverable error");
 			std::string out = "Fatal Error!\n";
 
-			for (auto it = path.crbegin(), end = path.crend();;)
+			auto it = path.crbegin(), end = path.crend();
+			if (it == end)
+			{
+				out += "└─ <Empty Stack Trace>\n";
+			}
+
+			for (;;)
 			{
 				const auto &seg = *it++;
 				if(it != end)
@@ -268,10 +274,11 @@ namespace tr
 		using Super_T::Super_T;
 	};
 
-	template<typename RecoverableContext>
-	auto MakeRecoverableError(RecoverableContext &&ctx)
+	template<typename RecoverableContext, typename CTX>
+	requires(std::same_as<RecoverableContext, std::remove_cvref_t<CTX>>)
+	auto MakeRecoverableError(CTX &&ctx)
 	{
-		return CppResult::ResultErr(Error<RecoverableContext>{ std::forward<RecoverableContext>(ctx) });
+		return CppResult::ResultErr(Error<RecoverableContext>{ std::forward<CTX>(ctx) });
 	}
 
 	template<typename RecoverableContext>
