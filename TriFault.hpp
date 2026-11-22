@@ -1,19 +1,19 @@
 ﻿#pragma once
 
-#include <string>
-#include <list>
+#include "MyAssert.hpp"
+#include "Result.hpp"
+
+#include <source_location>
+#include <type_traits>
+#include <exception>
+#include <concepts>
 #include <stdint.h>
 #include <stddef.h>
 #include <utility>
-#include <format>
-#include <source_location>
-#include <type_traits>
-#include <concepts>
-#include <exception>
+#include <string>
 #include <memory>
-
-#include "Result.hpp"
-#include "MyAssert.hpp"
+#include <format>
+#include <list>
 
 namespace tf
 {
