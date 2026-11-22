@@ -228,20 +228,25 @@ namespace tf
 			while(true)//至少1个
 			{
 				const auto &seg = *it++;
-				bool isLast = it == end;
-
-				out += std::format
-				(
-					isLast
-						? "├─ [{}:{}] {}\n│   message: {}\n│   detail: {}\n"
-						: "└─ [{}:{}] {}\n    message: {}\n    detail: {}\n",
-					seg.location.file_name(), seg.location.line(), seg.location.function_name(),
-					seg.message,
-					seg.detail
-				);
-
-				if(isLast)
+				if(it != end)
 				{
+					out += std::format
+					(
+						"├─ [{}:{}] {}\n│   message: {}\n│   detail: {}\n",
+						seg.location.file_name(), seg.location.line(), seg.location.function_name(),
+						seg.message,
+						seg.detail
+					);
+				}
+				else
+				{
+					out += std::format
+					(
+						"└─ [{}:{}] {}\n    message: {}\n    detail: {}\n",
+						seg.location.file_name(), seg.location.line(), seg.location.function_name(),
+						seg.message,
+						seg.detail
+					);
 					break;
 				}
 			}
