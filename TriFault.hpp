@@ -229,31 +229,26 @@ namespace tr
 			if (it == end)
 			{
 				out += "└─ <Empty Stack Trace>\n";
+				return out;
 			}
 
-			for (;;)
+			while(true)//至少1个
 			{
 				const auto &seg = *it++;
-				if(it != end)
-				{
-					out += std::format
-					(
-						"├─ [{}:{}] {}\n│   message: {}\n│   detail: {}\n",
-						seg.location.file_name(), seg.location.line(), seg.location.function_name(),
-						seg.message,
-						seg.detail
-					);
-				}
-				else
-				{
-					out += std::format
-					(
-						"└─ [{}:{}] {}\n    message: {}\n    detail: {}\n",
-						seg.location.file_name(), seg.location.line(), seg.location.function_name(),
-						seg.message,
-						seg.detail
-					);
+				bool isLast = it == end;
 
+				out += std::format
+				(
+					isLast
+						? "├─ [{}:{}] {}\n│   message: {}\n│   detail: {}\n"
+						: "└─ [{}:{}] {}\n    message: {}\n    detail: {}\n",
+					seg.location.file_name(), seg.location.line(), seg.location.function_name(),
+					seg.message,
+					seg.detail
+				);
+
+				if(isLast)
+				{
 					break;
 				}
 			}
