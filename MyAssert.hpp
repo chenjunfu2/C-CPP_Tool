@@ -48,7 +48,7 @@
 PRINTF_FORMAT_ATTR
 inline void MyAssert_Function(const char *pFileName, size_t szLine, const char *pFunctionName, const char *pExpressionName, PRINTF_FORMAT_ARGS const char *pInfo = NULL, ...)
 {
-	printf(
+	fprintf(stderr,
 		"------------------\n"
 		"Assertion Failure!\n"
 		"    Expr: %s\n"
@@ -60,15 +60,15 @@ inline void MyAssert_Function(const char *pFileName, size_t szLine, const char *
 	{
 		va_list vl;
 		va_start(vl, pInfo);
-		vprintf(pInfo, vl);
+		vfprintf(stderr, pInfo, vl);
 		va_end(vl);
 	}
 	else
 	{
-		printf("<None>");
+		fprintf(stderr, "<None>");
 	}
 
-	printf(
+	fprintf(stderr,
 		"\n"
 		"At:\n"
 		"    File: %s\n"
