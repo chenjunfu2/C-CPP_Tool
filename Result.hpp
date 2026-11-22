@@ -120,7 +120,7 @@ struct ResultInvokeTraits<F, void>
 template<typename F, typename V>
 using ResultInvokeTraits_T = typename ResultInvokeTraits<F, V>::Type;
 
-template <class T, class U>
+template<typename T, typename U>
 concept EqComparable = requires(T a, U b)
 {
 	{
@@ -128,12 +128,21 @@ concept EqComparable = requires(T a, U b)
 	} -> std::convertible_to<bool>;
 };
 
-template <class T, class U>
+template<typename T, typename U>
 concept NeqComparable = requires(T a, U b)
 {
 	{
 		a != b
 	} -> std::convertible_to<bool>;
+};
+
+template<typename T>
+concept HasFailInfo = requires(T)
+{
+	typename T::HasResultFailInfo;//标签
+	{
+		T::ResultFailInfo("test info")//调用测试
+	} -> std::same_as<void>;
 };
 
 template<typename TD, typename TC, typename ...Args>
@@ -1200,6 +1209,11 @@ public:
 	{
 		if (!bIsOk)
 		{
+			if constexpr (HasFailInfo<ErrType>)
+			{
+				ErrType::ResultFailInfo("Cannot extract the success value from a failed Result");
+			}
+
 			std::terminate();
 		}
 
@@ -1211,6 +1225,11 @@ public:
 	{
 		if (!bIsOk)
 		{
+			if constexpr (HasFailInfo<ErrType>)
+			{
+				ErrType::ResultFailInfo("Cannot extract the success value from a failed Result");
+			}
+
 			std::terminate();
 		}
 
@@ -1222,6 +1241,11 @@ public:
 	{
 		if (!bIsOk)
 		{
+			if constexpr (HasFailInfo<ErrType>)
+			{
+				ErrType::ResultFailInfo("Cannot extract the success value from a failed Result");
+			}
+
 			std::terminate();
 		}
 
@@ -1233,6 +1257,11 @@ public:
 	{
 		if (!bIsOk)
 		{
+			if constexpr (HasFailInfo<ErrType>)
+			{
+				ErrType::ResultFailInfo("Cannot extract the success value from a failed Result");
+			}
+
 			std::terminate();
 		}
 
@@ -1243,6 +1272,11 @@ public:
 	{
 		if (bIsOk)
 		{
+			if constexpr (HasFailInfo<ErrType>)
+			{
+				ErrType::ResultFailInfo("Cannot extract the error value from a successful Result");
+			}
+
 			std::terminate();
 		}
 
@@ -1253,6 +1287,11 @@ public:
 	{
 		if (bIsOk)
 		{
+			if constexpr (HasFailInfo<ErrType>)
+			{
+				ErrType::ResultFailInfo("Cannot extract the error value from a successful Result");
+			}
+
 			std::terminate();
 		}
 
@@ -1263,6 +1302,11 @@ public:
 	{
 		if (bIsOk)
 		{
+			if constexpr (HasFailInfo<ErrType>)
+			{
+				ErrType::ResultFailInfo("Cannot extract the error value from a successful Result");
+			}
+
 			std::terminate();
 		}
 
@@ -1273,6 +1317,11 @@ public:
 	{
 		if (bIsOk)
 		{
+			if constexpr (HasFailInfo<ErrType>)
+			{
+				ErrType::ResultFailInfo("Cannot extract the error value from a successful Result");
+			}
+
 			std::terminate();
 		}
 

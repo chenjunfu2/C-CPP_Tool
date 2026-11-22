@@ -253,6 +253,13 @@ namespace tf
 
 			return out;
 		}
+
+		using HasResultFailInfo = void;//标签
+		static void ResultFailInfo(const char *err)//Result错误信息反馈接口
+		{
+			constexpr bool ResultFail = false;
+			MyAssert(ResultFail, err);
+		}
 	};
 
 	template<typename Value, typename RecoverableContext>

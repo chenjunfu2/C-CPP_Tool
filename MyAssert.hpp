@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include <stdio.h>//printf
-#include <stdlib.h>//abort
 #include <stdarg.h>//va_arg
+#include <exception>//std::terminate();
 
 //必须没有提前定义过任何此类宏
 #if !defined(COMPILER_MSVC) &&\
@@ -80,7 +80,7 @@ inline void MyAssert_Function(const char *pFileName, size_t szLine, const char *
 		pFunctionName
 	);
 
-	abort();
+	std::terminate();
 }
 
 //代理宏，延迟展开
