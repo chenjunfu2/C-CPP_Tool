@@ -15,15 +15,8 @@
 #include "Result.hpp"
 #include "MyAssert.hpp"
 
-namespace tr
+namespace tf
 {
-	struct TestErrorInfo//测试用
-	{
-		uint64_t code;
-		std::string message;
-	};
-
-
 	template<typename RecoverableContext>
 	requires(std::same_as<std::remove_cvref_t<RecoverableContext>, RecoverableContext> && std::is_nothrow_destructible_v<RecoverableContext>)
 	struct Error//只存储Recoverable和回溯Fatal，Logic走Assert宏
