@@ -263,16 +263,7 @@ namespace tf
 	};
 
 	template<typename Value, typename RecoverableContext>
-	class Result : public CppResult::Result<Value, Error<RecoverableContext>>
-	{
-	public:
-		using Value_T = Value;
-		using Error_T = Error<RecoverableContext>;
-		using Super_T = CppResult::Result<Value, Error<RecoverableContext>>;
-		
-	public:
-		using Super_T::Super_T;
-	};
+	using Result = CppResult::Result<Value, Error<RecoverableContext>>;
 
 	template<typename RecoverableContext, typename CTX>
 	requires(std::same_as<RecoverableContext, std::remove_cvref_t<CTX>>)
